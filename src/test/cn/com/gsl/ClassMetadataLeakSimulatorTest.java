@@ -21,8 +21,9 @@ public class ClassMetadataLeakSimulatorTest {
     private static Map<String, ClassA> classLeakingMap = new HashMap<String, ClassA>();
     private final static int NB_ITERATIONS_DEFAULT = 50000;
 
+    // FIXME: 2019/1/20 https://blog.csdn.net/yjl33/article/details/78890363
     /**
-     * -XX:MaxPermSize=32m
+     * -Xmx3550m -Xms3550m -XX:MaxPermSize=32m
      */
     @Test
     public void test1() {
