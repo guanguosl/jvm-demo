@@ -56,6 +56,16 @@ public class ClassMetadataLeakSimulatorTest {
         this.test();
     }
 
+    /**
+     * -Xmx32m -Xms32m -XX:MaxPermSize=16m -XX:SurvivorRatio=2
+     * 设置年轻代（包括Eden和两个Survivor区）与年老代的比值（除去持久代）。
+     * 设置为4，则年轻代与年老代所占比值为1：4，年轻代占整个堆栈的1/5
+     */
+    @Test
+    public void testSurvivorRatio() {
+        this.test();
+    }
+
     private void test(){
         System.out.println("Class metadata leak simulator");
         System.out.println("Author: Pierre-Hugues Charbonneau");
