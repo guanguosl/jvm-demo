@@ -58,13 +58,24 @@ public class ClassMetadataLeakSimulatorTest {
 
     /**
      * -Xmx32m -Xms32m -XX:MaxPermSize=16m -XX:SurvivorRatio=2
-     * 设置年轻代（包括Eden和两个Survivor区）与年老代的比值（除去持久代）。
-     * 设置为4，则年轻代与年老代所占比值为1：4，年轻代占整个堆栈的1/5
+     * 设置幸存区大小，该值是和eden区的比值 -XX:SurvivorRatio=2代表：eden:survivor to:survivor from=2:1:1
+     * 代表单个survivor占整个年轻代的1/4
+     *
      */
     @Test
     public void testSurvivorRatio() {
         this.test();
     }
+
+    /**
+     * -Xmx32m -Xms32m  -XX:MaxMetaspaceSize=128m
+     *
+     */
+    @Test
+    public void testMaxMetaspaceSize() {
+        this.test();
+    }
+
 
     private void test(){
         System.out.println("Class metadata leak simulator");
