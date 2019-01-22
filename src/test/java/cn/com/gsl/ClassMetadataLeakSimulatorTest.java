@@ -30,14 +30,14 @@ public class ClassMetadataLeakSimulatorTest {
         this.test();
     }
 
-
     /**
      * jdk7 -Xmx64m -Xms64m -Xmn32m -XX:MaxPermSize=32m
      */
     @Test
     public void test2() {
-       this.test();
+        this.test();
     }
+
     /**
      * jdk6 -Xmx64m -Xms64m -Xmn32m -XX:MaxPermSize=32m
      */
@@ -68,16 +68,51 @@ public class ClassMetadataLeakSimulatorTest {
     }
 
     /**
-     * -Xmx32m -Xms32m  -XX:MaxMetaspaceSize=128m
-     *
+     * -Xmx32m -Xms32m  -XX:MaxMetaspaceSize=16m -XX:+PrintGCDetails
+     *  设置元空间大小，并打印日志
      */
     @Test
     public void testMaxMetaspaceSize() {
         this.test();
     }
 
+    /**
+     * -Xmx32m -Xms32m  -XX:MaxMetaspaceSize=16m -XX:+PrintGCDetails -XX:+PrintHeapAtGC
+     * -Xmx32m -Xms32m -XX:MaxPermSize=16m -XX:NewRatio=4
+     *  设置元空间大小，并打印GC日志，GC前后打印堆日志
+     */
+    @Test
+    public void testMaxMetaspaceSizePrintGCDetails() {
+        this.test();
+    }
 
-    private void test(){
+    /**
+     * -ea -Xmx32m -Xms32m  -XX:MaxMetaspaceSize=16m -XX:+PrintGCDetails -XX:+PrintHeapAtGC -XX:+UseParallelGC -XX:ParallelGCThreads=8
+     *  设置元空间大小，并打印GC日志，GC前后打印堆日志
+     */
+    @Test
+    public void threadTestMaxMetaspaceSizePrintGCDetails() {
+        this.threadTest();
+    }
+
+    public void threadTest() {
+        ClassMetadataLeakSimulatorTest classMetadataLeakSimulatorTest = new ClassMetadataLeakSimulatorTest();
+        for (int i = 0; i < 10; i++) {
+            Thread thread = new Thread(new MyThread(classMetadataLeakSimulatorTest, classLeakingMap));
+            thread.start();
+        }
+        try {
+            Thread.sleep(100000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void test() {
+        test(classLeakingMap);
+    }
+
+    public void test(Map<String, ClassA> classLeakingMap) {
         System.out.println("Class metadata leak simulator");
         System.out.println("Author: Pierre-Hugues Charbonneau");
         System.out.println("http://javaeesupportpatterns.blogspot.com");
@@ -109,6 +144,38 @@ public class ClassMetadataLeakSimulatorTest {
             System.out.println("ERROR: " + any + ";i=" + index);
         }
         System.out.println("Done!");
-//        System.gc();
+        //        System.gc();
+    }
+
+}
+
+class MyThread implements Runnable {
+    private ClassMetadataLeakSimulatorTest classMetadataLeakSimulatorTest;
+    private Map<String, ClassA> classLeakingMap;
+
+    public MyThread(ClassMetadataLeakSimulatorTest classMetadataLeakSimulatorTest, Map<String, ClassA> classLeakingMap) {
+        this.classMetadataLeakSimulatorTest = classMetadataLeakSimulatorTest;
+        this.classLeakingMap = classLeakingMap;
+    }
+
+    public ClassMetadataLeakSimulatorTest getClassMetadataLeakSimulatorTest() {
+        return classMetadataLeakSimulatorTest;
+    }
+
+    public void setClassMetadataLeakSimulatorTest(ClassMetadataLeakSimulatorTest classMetadataLeakSimulatorTest) {
+        this.classMetadataLeakSimulatorTest = classMetadataLeakSimulatorTest;
+    }
+
+    public Map<String, ClassA> getClassLeakingMap() {
+        return classLeakingMap;
+    }
+
+    public void setClassLeakingMap(Map<String, ClassA> classLeakingMap) {
+        this.classLeakingMap = classLeakingMap;
+    }
+
+    @Override
+    public void run() {
+        classMetadataLeakSimulatorTest.test(classLeakingMap);
     }
 }
